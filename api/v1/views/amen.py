@@ -14,7 +14,7 @@ def get_amen():
     all_objects = storage.all(Amenity)
     single_object = []
     for all_objects in all_objects.values():
-        single_object.append(all_objects.to_dict())
+        single_object.append(all_objects.to_dict)
     return jsonify(single_object)
 
 
@@ -26,25 +26,26 @@ def get_amen_id(amenity_id):
     new_dict = {}
     for key, value in all_objects.items():
         if amenity_id == value.id:
-            new_dict = value.to_dict()
+            new_dict = value.to_dict
             return jsonify(new_dict)
     abort(404)
 
 
 @app_views.route('/amenities/<amenity_id>',
                  methods=['DELETE'], strict_slashes=False)
-def delete_amen(amenity_id=None):
+def delete(amenity_id=None):
     """Deletes"""
-    obj = storage.get(Amenity, amenity_id)
+    obj = storage.get('Amenity', amenity_id)
     if obj is None:
         abort(404)
-    storage.delete(obj)
-    storage.save()
+    else:
+        storage.delete(obj)
+        storage.save()
     return jsonify({}), 200
 
 
 @app_views.route('/amenities', methods=['POST'], strict_slashes=False)
-def post_amen():
+def post():
     """Creates"""
     res = request.get_json()
     if not res:
@@ -57,14 +58,13 @@ def post_amen():
     return jsonify(obj.to_dict()), 201
 
 
-@app_views.route('/amenities/<amenity_id>',
-                 methods=['PUT'], strict_slashes=False)
-def put_amen(amenity_id=None):
+@app_views.route('/amenities/<amenity_id>', methods=['PUT'], strict_slashes=False)
+def put(amenity_id=None):
     """PUT"""
     res = request.get_json()
     if not res:
         abort(400, {"Not a JSON"})
-    obj = storage.get(Amenity, amenity_id)
+    obj = storage.get('Amenity', amenity_id)
     if obj is None:
         abort(404)
     i_key = ["id", "created_at", "updated_at"]

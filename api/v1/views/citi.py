@@ -3,68 +3,67 @@
 from os import name
 from api.v1.views import app_views
 from flask import jsonify, request, abort
-from models.amenity import Amenity
+from models.city import City
 from models import storage
 import json
 
 
-@app_views.route('/amenities', methods=['GET'], strict_slashes=False)
-def get_amen():
+@app_views.route('/states/<state_id>/cities', methods=['GET'], strict_slashes=False)
+def get_city(state_id):
     """gets all state objects"""
-    all_objects = storage.all(Amenity)
+    all_objects = storage.get(City, state_id)
+    if all_objects is None:
+        abort(404)
     single_object = []
-    for all_objects in all_objects.values():
-        single_object.append(all_objects.to_dict())
+    for city in all_objects.single_object:
+        single_object.append(city.to_dict())
     return jsonify(single_object)
 
 
-@app_views.route('/amenities/<amenity_id>', methods=['GET'],
+@app_views.route('/cities/<city_id>', methods=['GET'],
                  strict_slashes=False)
-def get_amen_id(amenity_id):
+def get_city_id(city_id):
     """gets the state object using his id"""
-    all_objects = storage.all(Amenity)
-    new_dict = {}
-    for key, value in all_objects.items():
-        if amenity_id == value.id:
-            new_dict = value.to_dict()
-            return jsonify(new_dict)
-    abort(404)
+    all_objects = storage.get(City, city_id)
+    if all_objects is None:
+        abort(404)
+    return jsonify(city.to_dict())
 
 
-@app_views.route('/amenities/<amenity_id>',
+@app_views.route('/cities/<city_id>',
                  methods=['DELETE'], strict_slashes=False)
-def delete_amen(amenity_id=None):
+def delete(city_id=None):
     """Deletes"""
-    obj = storage.get(Amenity, amenity_id)
+    obj = storage.get(City, city_id)
     if obj is None:
         abort(404)
-    storage.delete(obj)
-    storage.save()
+    else:
+        storage.delete(obj)
+        storage.save()
     return jsonify({}), 200
 
 
-@app_views.route('/amenities', methods=['POST'], strict_slashes=False)
-def post_amen():
+@app_views.route('/states/<state_id>/cities', methods=['POST'], strict_slashes=False)
+def post():
     """Creates"""
     res = request.get_json()
     if not res:
         abort(400, {"Not a JSON"})
     if 'name' not in res:
         abort(400, {"Missing name"})
-    obj = Amenity(name=res['name'])
+    obj = State(name=res['name'])
     storage.new(obj)
     storage.save()
     return jsonify(obj.to_dict()), 201
 
 
-@app_views.route('/amenities/<amenity_id>',
-                 methods=['PUT'], strict_slashes=False)
-def put_amen(amenity_id=None):
+@app_views.route('/cities/<city_id>', methods=['PUT'], strict_slashes=False)
+def put(city_id=None):
     """PUT"""
     res = request.get_json()
     if not res:
         abort(400, {"Not a JSON"})
-    obj = storage.get(Amenity, amenity_id)
+    obj = storage.get(City, city_id)
     if obj is None:
         abort(404)
     i_key = ["id", "created_at", "updated_at"]

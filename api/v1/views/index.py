@@ -1,62 +1,30 @@
 #!/usr/bin/python3
-"""
-Index model holds the endpoint (route)
-"""
-from api.v1.views import app_views, storage
+"""returns the status of the API"""
+import models
+from models import storage
+from models.amenity import Amenity
+from models.base_model import BaseModel
+from models.city import City
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
 from flask import jsonify
+from api.v1.views import app_views
 
 
-@app_views.route('/status/')
-def status():
-    """Example endpoint returns status
-    returns the current status of the API
-    ---
-    definitions:
-      status:
-        type: object
-      Color:
-        type: string
-      items:
-        $ref: '#/definitions/Color'
-
-    responses:
-      200:
-        description: dictionary with 'status' as key and 'ok' as keyvalue
-        schema:
-          $ref: '#/definitions/State'
-        examples:
-            {"status": "OK"}
-    """
-    return jsonify({"status": "OK"})
+@app_views.route('/status')
+def api_status():
+    """returns the status of the API"""
+    return jsonify(status='OK')
 
 
-@app_views.route('/stats/')
-def stats():
-    """Example endpoint returns stats
-    returns a number of objects of each class
-    ---
-    definitions:
-      status:
-        type: object
-      Color:
-        type: string
-      items:
-        $ref: '#/definitions/Color'
-
-    responses:
-      200:
-        description: dictionary with 'status' as key and 'ok' as keyvalue
-        schema:
-          $ref: '#/definitions/State'
-        examples:
-           { "amenities": 47, "cities": 36, "places": 154, "reviews": 718,
-             "states": 27, "users": 31}
-    """
-    models_available = {"User": "users",
-                        "Amenity": "amenities", "City": "cities",
-                        "Place": "places", "Review": "reviews",
-                        "State": "states"}
-    stats = {}
-    for cls in models_available.keys():
-        stats[models_available[cls]] = storage.count(cls)
-    return jsonify(stats)
+@app_views.route('/stats')
+def api_stats():
+    """checks the API stats of all classes"""
+    classes = {"amenities": Amenity, "cities": City,
+               "places": Place, "reviews": Review,
+               "states": State, "users": User}
+    for key in classes:
+        classes[key] = storage.count(classes[key])
+    return jsonify(classes)
